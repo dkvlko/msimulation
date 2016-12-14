@@ -1,6 +1,6 @@
 public class EquationParserEngine {
 
-	StringBuilder equation = new StringBuilder("exp(-x/100)");
+	StringBuilder equation = new StringBuilder("(-10)");
 
 	public static void main(String args[]) {
 		EquationParserEngine epn = new EquationParserEngine();
@@ -18,11 +18,11 @@ public class EquationParserEngine {
 		equation = new StringBuilder(equation.toString().replaceAll("exp", "e"));
 		// System.out.println("new equation " + equation);
 		// System.exit(0);
-		for (int x = -300; x <= 300; x++) {
-			// System.out.println("X Value " + x);
+		for (int x = -2; x <= 1; x++) {
+			System.out.println("X Value " + x);
 			StringBuilder processEqu = new StringBuilder(equation);
 			yValue = getYValue(processEqu, x);
-			// System.out.println("Y Value " + yValue);
+			System.out.println("Y Value " + yValue);
 		}
 	}
 
@@ -82,6 +82,13 @@ public class EquationParserEngine {
 
 		}
 		if (processEqu.length() != 0) {
+			index = processEqu.indexOf("^", 1);
+			if (index != -1) {
+				y = performNRoot(processEqu, x, index);
+			}
+
+		}
+		if (processEqu.length() != 0) {
 			index = processEqu.indexOf("/", 1);
 			if (index != -1) {
 				y = performDivision(processEqu, x, index);
@@ -116,6 +123,112 @@ public class EquationParserEngine {
 		return y;
 	}
 
+	private float performNRoot(StringBuilder processEqu, int x, int index) {
+		// TODO Auto-generated method stub
+		String rightNum = "";
+		String leftNum = "";
+		int leftCut = 0;
+		int rightCut = 0;
+		int sign = 1;
+		float yvalue = 0;
+		System.out.println("Equation " + processEqu);
+		// get right to index value
+		for (int right = index + 1; right < processEqu.length(); right++) {
+			rightCut = right + 1;// if operator is not found on the right then
+									// the rightCut will greater than max index
+			// if on the right side operator is found then substring but ignore
+			// if there is + or - immediately on right
+			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+				rightCut = right;// this position will be used to delete the
+									// substring;the operator will not be
+									// deleted
+				break;
+			} else {
+				if (processEqu.charAt(right) == 'x') {
+					if (processEqu.charAt(index + 1) == '-') {
+						rightNum = Integer.toString(-x);
+					} else {
+						rightNum = Integer.toString(x);
+					}
+				} else {
+					rightNum = rightNum + processEqu.charAt(right);
+				}
+			}
+		}
+		// System.out.println("Postion of new operator right " + rightCut);
+		// get left to index value
+		for (int left = index - 1; left >= 0; left--) {
+			leftCut = left;// make it out of bound if no operator on left
+			if (processEqu.charAt(left) == '/' || processEqu.charAt(left) == '*' || processEqu.charAt(left) == '+'
+					|| processEqu.charAt(left) == '-') {
+				leftCut = left + 1;
+				if (processEqu.charAt(left) == '-') {
+					sign = -1;
+					leftCut = left;
+				}
+				if (processEqu.charAt(left) == '+') {
+					leftCut = left;
+				}
+				// for substring further
+				break;
+			} else {
+				if (processEqu.charAt(left) == 'x') {
+					if (processEqu.charAt(left - 1) == '-') {
+						sign = -1;
+						leftCut = left - 1;
+					}
+					leftNum = Integer.toString(x);
+				} else {
+					leftNum = processEqu.charAt(left) + leftNum;
+				}
+			}
+		}
+		// System.out.println("Postion of left delete" + leftCut);
+		// System.out.println("The equation is " + processEqu);
+		// System.out.println("Left Number Found as " + sign + " " + leftNum);
+		// System.out.println("Right Number Found as " + rightNum);
+
+		// if operator index is not zero then it is not a sign
+		double yvalue1 = 0;
+		yvalue1 = sign * Math.pow((double) Float.valueOf(leftNum), (double) Float.valueOf(rightNum));
+
+		yvalue = (float) yvalue1;
+		if (yvalue < 0.001 && yvalue > 0) {
+			yvalue = 0;
+		}
+		if (yvalue > -0.001 && yvalue < 0) {
+			yvalue = 0;
+		}
+		// System.out.println("Value Calculated " + yvalue);
+		/*
+		 * System.out.println("Value Calculated "+yvalue); System.out.println(
+		 * "LeftCut "+leftCut); System.out.println("RightCut "+rightCut);
+		 * System.out.println("SubString "+sb.substring(leftCut,rightCut));
+		 */
+		if (leftCut == 0 && rightCut == processEqu.length()) {
+			// System.out.println("Number Found Final " + yvalue);
+			processEqu.setLength(0);
+			return yvalue;
+		} else {
+			// System.out.println("Before Further Processing String " +
+			// processEqu);
+			processEqu.delete(leftCut, rightCut);
+			String insY = null;
+			if (yvalue == 0) {
+				yvalue = yvalue + 0;
+			}
+			if (yvalue >= 0) {
+				insY = "+" + Float.toString(yvalue);
+			} else {
+				insY = Float.toString(yvalue);
+			}
+			processEqu.insert(leftCut, insY);
+			// System.out.println("Further Processing String " + processEqu);
+			return getYValue(processEqu, x);
+		}
+	}
+
 	private float performExp(StringBuilder processEqu, int x, int index) {
 		String rightNum = "";
 		int leftCut = index;
@@ -124,7 +237,8 @@ public class EquationParserEngine {
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;
 			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
-					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-'
+					|| processEqu.charAt(right) == '^')) {
 				rightCut = right;
 				break;
 			} else {
@@ -179,7 +293,8 @@ public class EquationParserEngine {
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;
 			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
-					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-'
+					|| processEqu.charAt(right) == '^')) {
 				rightCut = right;
 				break;
 			} else {
@@ -232,7 +347,8 @@ public class EquationParserEngine {
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;
 			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
-					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-'
+					|| processEqu.charAt(right) == '^')) {
 				rightCut = right;
 				break;
 			} else {
@@ -284,7 +400,8 @@ public class EquationParserEngine {
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;
 			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
-					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-'
+					|| processEqu.charAt(right) == '^')) {
 				rightCut = right;
 				break;
 			} else {
@@ -336,7 +453,8 @@ public class EquationParserEngine {
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;
 			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
-					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-'
+					|| processEqu.charAt(right) == '^')) {
 				rightCut = right;
 				break;
 			} else {
@@ -385,6 +503,7 @@ public class EquationParserEngine {
 		String rightEqu = "";
 		int leftCut = index;
 		int rightCut = 0;
+		int sign = 1;
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			if (processEqu.charAt(right) == ')') {
 				rightCut = right + 1;
@@ -394,7 +513,16 @@ public class EquationParserEngine {
 		}
 		// System.out.println("Core Bracket to be replaced" + rightEqu);
 		float yvalue = getYValue(new StringBuilder(rightEqu), x);
-		String bIns = Float.toString(yvalue);
+		if (index > 0 && processEqu.charAt(index - 1) == '-') {
+			leftCut = leftCut - 1;
+			sign = -1;
+		}
+		if (index > 0 && processEqu.charAt(index - 1) == '+') {
+			leftCut = leftCut - 1;
+			sign = 1;
+		}
+		String bIns = Float.toString(sign * yvalue);
+
 		processEqu.delete(leftCut, rightCut);
 		processEqu.insert(leftCut, bIns);
 		return getYValue(processEqu, x);
@@ -707,7 +835,8 @@ public class EquationParserEngine {
 		int rightCut = 0;
 		int sign = 1;
 		float yvalue = 0;
-
+		// System.out.println("String to process for substraction " +
+		// processEqu);
 		// get right to index value
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;// if operator is not found on the right then
@@ -776,11 +905,12 @@ public class EquationParserEngine {
 		 * System.out.println("SubString "+sb.substring(leftCut,rightCut));
 		 */
 		if (leftCut == 0 && rightCut == processEqu.length()) {
-			// System.out.println("Number Found Final "+yvalue);
+			// System.out.println("Number Found Final " + yvalue);
 			processEqu.setLength(0);
 			return yvalue;
 		} else {
-			// System.out.println("Before Further Processing String "+sb);
+			// System.out.println("Before Further Processing String " +
+			// processEqu);
 			processEqu.delete(leftCut, rightCut);
 			String insY = null;
 			if (yvalue == 0) {
@@ -792,7 +922,7 @@ public class EquationParserEngine {
 				insY = Float.toString(yvalue);
 			}
 			processEqu.insert(leftCut, insY);
-			// System.out.println("Further Processing String "+sb);
+			// System.out.println("Further Processing String " + processEqu);
 			return getYValue(processEqu, x);
 		}
 
