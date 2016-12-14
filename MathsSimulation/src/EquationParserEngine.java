@@ -1,7 +1,6 @@
-
 public class EquationParserEngine {
 
-	StringBuilder equation = new StringBuilder("-tan(x)");
+	StringBuilder equation = new StringBuilder("exp(-x/100)");
 
 	public static void main(String args[]) {
 		EquationParserEngine epn = new EquationParserEngine();
@@ -16,9 +15,10 @@ public class EquationParserEngine {
 		equation = new StringBuilder(equation.toString().replaceAll("cos", "c"));
 		equation = new StringBuilder(equation.toString().replaceAll("tan", "t"));
 		equation = new StringBuilder(equation.toString().replaceAll("log", "l"));
+		equation = new StringBuilder(equation.toString().replaceAll("exp", "e"));
 		// System.out.println("new equation " + equation);
 		// System.exit(0);
-		for (int x = -2; x < 2; x++) {
+		for (int x = -300; x <= 300; x++) {
 			// System.out.println("X Value " + x);
 			StringBuilder processEqu = new StringBuilder(equation);
 			yValue = getYValue(processEqu, x);
@@ -49,6 +49,7 @@ public class EquationParserEngine {
 			index = processEqu.indexOf("s");
 			if (index != -1) {
 				y = performSin(processEqu, x, index);
+
 			}
 
 		}
@@ -70,6 +71,13 @@ public class EquationParserEngine {
 			index = processEqu.indexOf("l");
 			if (index != -1) {
 				y = performLog(processEqu, x, index);
+			}
+
+		}
+		if (processEqu.length() != 0) {
+			index = processEqu.indexOf("e");
+			if (index != -1) {
+				y = performExp(processEqu, x, index);
 			}
 
 		}
@@ -108,10 +116,66 @@ public class EquationParserEngine {
 		return y;
 	}
 
+	private float performExp(StringBuilder processEqu, int x, int index) {
+		String rightNum = "";
+		int leftCut = index;
+		int rightCut = 0;
+		// System.out.println("Equation to process " + processEqu);
+		for (int right = index + 1; right < processEqu.length(); right++) {
+			rightCut = right + 1;
+			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
+					|| processEqu.charAt(right) == '+' || processEqu.charAt(right) == '-')) {
+				rightCut = right;
+				break;
+			} else {
+				if (processEqu.charAt(right) == 'x') {
+					if (processEqu.charAt(index + 1) == '-') {
+						rightNum = Integer.toString(-x);
+					} else {
+						rightNum = Integer.toString(x);
+					}
+				} else {
+					rightNum = rightNum + processEqu.charAt(right);
+				}
+			}
+		}
+		float yvalue = (float) Math.exp((double) Float.valueOf(rightNum));
+		// System.out.println("Yvalue " + yvalue);
+		if (yvalue < 0.001 && yvalue > 0) {
+			yvalue = 0;
+		}
+		if (yvalue > -0.001 && yvalue < 0) {
+			yvalue = 0;
+		}
+		if (index != 0 && (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+')) {
+			leftCut = index - 1;
+			if (processEqu.charAt(index - 1) == '-') {
+				yvalue = -yvalue;
+			}
+		}
+
+		if (yvalue == 0) { // to handle -0
+			yvalue = yvalue + 0;
+		}
+		// System.out.println("Equation perform sin " + processEqu);
+		String insY = "";
+		processEqu.delete(leftCut, rightCut);
+		if (yvalue >= 0) {
+			insY = "+" + Float.toString(yvalue);
+		} else {
+			insY = Float.toString(yvalue);
+		}
+		processEqu.insert(leftCut, insY);
+		// System.out.println("Equation perform exp further processing " +
+		// processEqu);
+		return getYValue(processEqu, x);
+	}
+
 	private float performSin(StringBuilder processEqu, int x, int index) {
 		String rightNum = "";
 		int leftCut = index;
 		int rightCut = 0;
+
 		for (int right = index + 1; right < processEqu.length(); right++) {
 			rightCut = right + 1;
 			if (right != index + 1 && (processEqu.charAt(right) == '/' || processEqu.charAt(right) == '*'
@@ -131,13 +195,19 @@ public class EquationParserEngine {
 			}
 		}
 		float yvalue = (float) Math.sin((double) Float.valueOf(rightNum));
-
-		if (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+') {
+		if (yvalue < 0.001 && yvalue > 0) {
+			yvalue = 0;
+		}
+		if (yvalue > -0.001 && yvalue < 0) {
+			yvalue = 0;
+		}
+		if (index != 0 && (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+')) {
 			leftCut = index - 1;
 			if (processEqu.charAt(index - 1) == '-') {
 				yvalue = -yvalue;
 			}
 		}
+
 		if (yvalue == 0) { // to handle -0
 			yvalue = yvalue + 0;
 		}
@@ -178,8 +248,13 @@ public class EquationParserEngine {
 			}
 		}
 		float yvalue = (float) Math.cos((double) Float.valueOf(rightNum));
-
-		if (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+') {
+		if (yvalue < 0.001 && yvalue > 0) {
+			yvalue = 0;
+		}
+		if (yvalue > -0.001 && yvalue < 0) {
+			yvalue = 0;
+		}
+		if (index != 0 && (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+')) {
 			leftCut = index - 1;
 			if (processEqu.charAt(index - 1) == '-') {
 				yvalue = -yvalue;
@@ -225,8 +300,13 @@ public class EquationParserEngine {
 			}
 		}
 		float yvalue = (float) Math.tan((double) Float.valueOf(rightNum));
-
-		if (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+') {
+		if (yvalue < 0.001 && yvalue > 0) {
+			yvalue = 0;
+		}
+		if (yvalue > -0.001 && yvalue < 0) {
+			yvalue = 0;
+		}
+		if (index != 0 && (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+')) {
 			leftCut = index - 1;
 			if (processEqu.charAt(index - 1) == '-') {
 				yvalue = -yvalue;
@@ -272,8 +352,13 @@ public class EquationParserEngine {
 			}
 		}
 		float yvalue = (float) Math.log((double) Float.valueOf(rightNum));
-
-		if (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+') {
+		if (yvalue < 0.001 && yvalue > 0) {
+			yvalue = 0;
+		}
+		if (yvalue > -0.001 && yvalue < 0) {
+			yvalue = 0;
+		}
+		if (index != 0 && (processEqu.charAt(index - 1) == '-' || processEqu.charAt(index - 1) == '+')) {
 			leftCut = index - 1;
 			if (processEqu.charAt(index - 1) == '-') {
 				yvalue = -yvalue;
@@ -487,7 +572,7 @@ public class EquationParserEngine {
 			yvalue = -Float.valueOf(leftNum) * Float.valueOf(rightNum);
 			sign = 1;
 		}
-
+		// System.out.println("Value Calculated " + yvalue);
 		/*
 		 * System.out.println("Value Calculated "+yvalue); System.out.println(
 		 * "LeftCut "+leftCut); System.out.println("RightCut "+rightCut);

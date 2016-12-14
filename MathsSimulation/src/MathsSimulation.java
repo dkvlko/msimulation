@@ -43,15 +43,19 @@ class MyPanel extends JPanel {
 			equation = new StringBuilder(equation.toString().replaceAll("cos", "c"));
 			equation = new StringBuilder(equation.toString().replaceAll("tan", "t"));
 			equation = new StringBuilder(equation.toString().replaceAll("log", "l"));
+			equation = new StringBuilder(equation.toString().replaceAll("exp", "e"));
 			for (int x = -300; x <= 300; x++) {
 				// System.out.println("X Value " + x);
 				StringBuilder processEqu = new StringBuilder(equation);
 				yValue = epn.getYValue(processEqu, x);
+				// System.out.println("Y value " + yValue);
 				if (x == -300) {
 					prevX = -300;
 					prevY = (int) yValue;
 				} else {
 					g.drawLine(prevX + 300, 240 - prevY, x + 300, 240 - (int) yValue);
+					prevX = x;
+					prevY = (int) yValue;
 				}
 				// System.out.println("Y Value " + yValue);
 			}
