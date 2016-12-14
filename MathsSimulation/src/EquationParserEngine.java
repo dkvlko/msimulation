@@ -19,14 +19,14 @@ public class EquationParserEngine {
 		// System.out.println("new equation " + equation);
 		// System.exit(0);
 		for (int x = -2; x < 2; x++) {
-			System.out.println("X Value " + x);
+			// System.out.println("X Value " + x);
 			StringBuilder processEqu = new StringBuilder(equation);
 			yValue = getYValue(processEqu, x);
-			System.out.println("Y Value " + yValue);
+			// System.out.println("Y Value " + yValue);
 		}
 	}
 
-	private float getYValue(StringBuilder processEqu, int x) {
+	public float getYValue(StringBuilder processEqu, int x) {
 		// TODO Auto-generated method stub
 		// System.out.println("Equation for getYValue " + processEqu);
 		// processEqu.setLength(0);
